@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Permutation — Rearrange Pixels, Preserve Histogram</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1 class="title">Pixel Permutation</h1>
+      <p class="subtitle">Rearrange base pixels to match target structure — histogram unchanged</p>
+    </header>
+
+    <main class="main">
+      <section class="upload-section">
+        <label class="upload-zone" id="baseUploadZone">
+          <input type="file" id="baseInput" accept="image/*" hidden>
+          <span class="upload-icon">↑</span>
+          <span class="upload-text">Base image</span>
+          <span class="upload-hint">Pixels to rearrange</span>
+        </label>
+        <label class="upload-zone" id="targetUploadZone">
+          <input type="file" id="targetInput" accept="image/*" hidden>
+          <span class="upload-icon">↑</span>
+          <span class="upload-text">Target image</span>
+          <span class="upload-hint">Structure to match</span>
+        </label>
+      </section>
+
+      <section class="controls">
+        <div class="control-group">
+          <label for="method">Matching method</label>
+          <select id="method">
+            <option value="luminance">Luminance (fast)</option>
+            <option value="rgb">RGB distance (quality)</option>
+          </select>
+        </div>
+        <button class="btn-run" id="runBtn" disabled>Transform</button>
+      </section>
+
+      <section class="gallery">
+        <div class="panel base-panel">
+          <h3>Base Image <span class="histogram-badge">histogram preserved</span></h3>
+          <div class="canvas-wrap">
+            <canvas id="baseCanvas"></canvas>
+          </div>
+        </div>
+        <div class="panel target-panel">
+          <h3>Target Structure</h3>
+          <div class="canvas-wrap">
+            <canvas id="targetCanvas"></canvas>
+          </div>
+        </div>
+        <div class="panel output-panel">
+          <h3>Permuted Output
+            <button class="btn-download" id="downloadBtn" title="Download result" disabled>↓</button>
+          </h3>
+          <div class="canvas-wrap">
+            <canvas id="outputCanvas"></canvas>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Same pixels as base — only rearranged spatially</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
