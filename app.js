@@ -10,14 +10,9 @@ const targetUploadZone = document.getElementById('targetUploadZone');
 const runBtn = document.getElementById('runBtn');
 const methodSelect = document.getElementById('method');
 
-const baseCanvas = document.getElementById('baseCanvas');
-const baseCtx = baseCanvas.getContext('2d');
-const targetCanvas = document.getElementById('targetCanvas');
-const targetCtx = targetCanvas.getContext('2d');
 const outputCanvas = document.getElementById('outputCanvas');
 const outputCtx = outputCanvas.getContext('2d');
 const downloadBtn = document.getElementById('downloadBtn');
-const animateBtn = document.getElementById('animateBtn');
 
 let baseImageData = null;
 let targetImageData = null;
@@ -65,7 +60,7 @@ function loadBaseImage(file) {
   img.onload = () => {
     baseImageData = img;
     baseLoaded = true;
-    drawBasePreview();
+    baseUploadZone.classList.add('has-file');
     URL.revokeObjectURL(url);
     tryEnableRun();
   };
@@ -82,7 +77,7 @@ function loadTargetImage(file) {
   img.onload = () => {
     targetImageData = img;
     targetLoaded = true;
-    drawTargetPreview();
+    targetUploadZone.classList.add('has-file');
     URL.revokeObjectURL(url);
     tryEnableRun();
   };
@@ -91,34 +86,6 @@ function loadTargetImage(file) {
     alert('Failed to load image.');
   };
   img.src = url;
-}
-
-function drawBasePreview() {
-  if (!baseImageData) return;
-  const maxDim = 200;
-  const w = baseImageData.width;
-  const h = baseImageData.height;
-  const scale = Math.min(maxDim / w, maxDim / h, 1);
-  const dw = Math.round(w * scale);
-  const dh = Math.round(h * scale);
-  baseCanvas.width = dw;
-  baseCanvas.height = dh;
-  baseCtx.imageSmoothingEnabled = true;
-  baseCtx.imageSmoothingQuality = 'high';
-  baseCtx.drawImage(baseImageData, 0, 0, w, h, 0, 0, dw, dh);
-}
-
-function drawTargetPreview() {
-  if (!targetImageData) return;
-  const w = targetImageData.width;
-  const h = targetImageData.height;
-  const maxDim = 200;
-  const scale = Math.min(maxDim / w, maxDim / h, 1);
-  const dw = Math.round(w * scale);
-  const dh = Math.round(h * scale);
-  targetCanvas.width = dw;
-  targetCanvas.height = dh;
-  targetCtx.drawImage(targetImageData, 0, 0, w, h, 0, 0, dw, dh);
 }
 
 function tryEnableRun() {
@@ -263,15 +230,14 @@ runBtn.addEventListener('click', async () => {
   const assignment = computePermutation(baseData, targetData, method);
   outputCanvas.width = targetW;
   outputCanvas.height = targetH;
-  const outData = outputCtx.createImageData(targetW, targetH);
-  applyPermutation(baseData, assignment, outData);
-  outputCtx.putImageData(outData, 0, 0);
 
   lastTransform = { baseData, assignment, w: targetW, h: targetH };
   downloadBtn.disabled = false;
-  animateBtn.disabled = false;
-  runBtn.classList.remove('running');
-  runBtn.textContent = 'Transform';
+
+  outputCtx.putImageData(baseData, 0, 0);
+  runBtn.classList.add('running');
+  runBtn.textContent = 'Animating…';
+  runPixelAnimation();
 });
 
 downloadBtn.addEventListener('click', () => {
@@ -296,9 +262,8 @@ function runPixelAnimation() {
     invAssignment[assignment[outIdx]] = outIdx;
   }
 
-  const sampleStep = Math.max(1, Math.floor(Math.sqrt(n / 1200)));
   const moves = [];
-  for (let baseIdx = 0; baseIdx < n; baseIdx += sampleStep) {
+  for (let baseIdx = 0; baseIdx < n; baseIdx++) {
     const outIdx = invAssignment[baseIdx];
     const bx = baseIdx % w;
     const by = Math.floor(baseIdx / w);
@@ -322,13 +287,12 @@ function runPixelAnimation() {
     const ctx = outputCtx;
     ctx.putImageData(baseData, 0, 0);
 
-    const dotSize = Math.max(2, Math.min(4, Math.round(w / 96)));
     const departThreshold = 0.02;
 
     ctx.fillStyle = 'black';
     for (const m of moves) {
       if (eased > departThreshold) {
-        ctx.fillRect(m.bx, m.by, dotSize, dotSize);
+        ctx.fillRect(m.bx, m.by, 1, 1);
       }
     }
 
@@ -337,7 +301,7 @@ function runPixelAnimation() {
       const x = m.bx + (m.ox - m.bx) * eased;
       const y = m.by + (m.oy - m.by) * eased;
       ctx.fillStyle = `rgb(${m.r},${m.g},${m.b})`;
-      ctx.fillRect(Math.floor(x), Math.floor(y), dotSize, dotSize);
+      ctx.fillRect(Math.floor(x), Math.floor(y), 1, 1);
     }
 
     if (t < 1) {
@@ -346,16 +310,10 @@ function runPixelAnimation() {
       const outData = ctx.createImageData(w, h);
       applyPermutation(baseData, assignment, outData);
       ctx.putImageData(outData, 0, 0);
-      animateBtn.classList.remove('playing');
-      animateBtn.textContent = '▶ Animate';
+      runBtn.classList.remove('running');
+      runBtn.textContent = 'Transform';
     }
   }
 
-  animateBtn.classList.add('playing');
-  animateBtn.textContent = 'Playing…';
   requestAnimationFrame(drawFrame);
 }
-
-animateBtn.addEventListener('click', () => {
-  if (lastTransform) runPixelAnimation();
-});

@@ -69,6 +69,7 @@ body {
 }
 
 .upload-zone {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -105,6 +106,26 @@ body {
 .upload-hint {
   font-size: 0.8rem;
   color: var(--text-muted);
+}
+
+.upload-tick {
+  display: none;
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: var(--success);
+  color: var(--bg);
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: bold;
+  line-height: 1.5rem;
+  text-align: center;
+}
+
+.upload-zone.has-file .upload-tick {
+  display: block;
 }
 
 .controls {
@@ -180,16 +201,15 @@ input[type="range"] {
   50% { opacity: 0.7; }
 }
 
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+.output-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-@media (max-width: 900px) {
-  .gallery {
-    grid-template-columns: 1fr;
-  }
+.output-panel {
+  width: 100%;
+  max-width: 720px;
 }
 
 .panel {
@@ -222,34 +242,8 @@ input[type="range"] {
   border-radius: 4px;
 }
 
-.btn-animate {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  padding: 0.4rem 0.8rem;
-  background: var(--surface-hover);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.btn-animate:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.btn-animate:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.btn-animate.playing {
-  color: var(--accent);
-}
-
 .btn-download {
+  margin-left: auto;
   font-size: 1rem;
   width: 2rem;
   height: 2rem;
@@ -280,6 +274,11 @@ input[type="range"] {
   background: #0a090c;
   padding: 1rem;
   min-height: 160px;
+}
+
+.canvas-wrap-large {
+  min-height: 400px;
+  padding: 1.5rem;
 }
 
 .canvas-wrap canvas {

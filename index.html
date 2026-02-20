@@ -23,12 +23,14 @@
           <span class="upload-icon">↑</span>
           <span class="upload-text">Base image</span>
           <span class="upload-hint">Pixels to rearrange</span>
+          <span class="upload-tick" id="baseTick" aria-hidden="true">✓</span>
         </label>
         <label class="upload-zone" id="targetUploadZone">
           <input type="file" id="targetInput" accept="image/*" hidden>
           <span class="upload-icon">↑</span>
           <span class="upload-text">Target image</span>
           <span class="upload-hint">Structure to match</span>
+          <span class="upload-tick" id="targetTick" aria-hidden="true">✓</span>
         </label>
       </section>
 
@@ -43,25 +45,13 @@
         <button class="btn-run" id="runBtn" disabled>Transform</button>
       </section>
 
-      <section class="gallery">
-        <div class="panel base-panel">
-          <h3>Base Image <span class="histogram-badge">histogram preserved</span></h3>
-          <div class="canvas-wrap">
-            <canvas id="baseCanvas"></canvas>
-          </div>
-        </div>
-        <div class="panel target-panel">
-          <h3>Target Structure</h3>
-          <div class="canvas-wrap">
-            <canvas id="targetCanvas"></canvas>
-          </div>
-        </div>
+      <section class="output-section">
         <div class="panel output-panel">
-          <h3>Permuted Output
-            <button class="btn-animate" id="animateBtn" title="Show pixel movement" disabled>▶ Animate</button>
+          <h3>
+            <span class="histogram-badge">histogram preserved</span>
             <button class="btn-download" id="downloadBtn" title="Download result" disabled>↓</button>
           </h3>
-          <div class="canvas-wrap">
+          <div class="canvas-wrap canvas-wrap-large">
             <canvas id="outputCanvas"></canvas>
           </div>
         </div>
