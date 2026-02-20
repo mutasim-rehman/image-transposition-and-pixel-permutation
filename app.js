@@ -17,11 +17,13 @@ const targetCtx = targetCanvas.getContext('2d');
 const outputCanvas = document.getElementById('outputCanvas');
 const outputCtx = outputCanvas.getContext('2d');
 const downloadBtn = document.getElementById('downloadBtn');
+const animateBtn = document.getElementById('animateBtn');
 
 let baseImageData = null;
 let targetImageData = null;
 let baseLoaded = false;
 let targetLoaded = false;
+let lastTransform = null;
 
 // Base image upload
 baseUploadZone.addEventListener('dragover', (e) => {
@@ -265,7 +267,9 @@ runBtn.addEventListener('click', async () => {
   applyPermutation(baseData, assignment, outData);
   outputCtx.putImageData(outData, 0, 0);
 
+  lastTransform = { baseData, assignment, w: targetW, h: targetH };
   downloadBtn.disabled = false;
+  animateBtn.disabled = false;
   runBtn.classList.remove('running');
   runBtn.textContent = 'Transform';
 });
@@ -276,4 +280,82 @@ downloadBtn.addEventListener('click', () => {
   a.download = 'pixel-permutation-output.png';
   a.href = outputCanvas.toDataURL('image/png');
   a.click();
+});
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function runPixelAnimation() {
+  if (!lastTransform) return;
+  const { baseData, assignment, w, h } = lastTransform;
+  const n = w * h;
+
+  const invAssignment = new Array(n);
+  for (let outIdx = 0; outIdx < n; outIdx++) {
+    invAssignment[assignment[outIdx]] = outIdx;
+  }
+
+  const sampleStep = Math.max(1, Math.floor(Math.sqrt(n / 1200)));
+  const moves = [];
+  for (let baseIdx = 0; baseIdx < n; baseIdx += sampleStep) {
+    const outIdx = invAssignment[baseIdx];
+    const bx = baseIdx % w;
+    const by = Math.floor(baseIdx / w);
+    const ox = outIdx % w;
+    const oy = Math.floor(outIdx / w);
+    if (bx !== ox || by !== oy) {
+      const bi = baseIdx * 4;
+      moves.push({ bx, by, ox, oy, r: baseData.data[bi], g: baseData.data[bi + 1], b: baseData.data[bi + 2] });
+    }
+  }
+
+  const duration = 2500;
+  let startTime = null;
+
+  function drawFrame(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const elapsed = timestamp - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    const eased = easeInOutCubic(t);
+
+    const ctx = outputCtx;
+    ctx.putImageData(baseData, 0, 0);
+
+    const dotSize = Math.max(2, Math.min(4, Math.round(w / 96)));
+    const departThreshold = 0.02;
+
+    ctx.fillStyle = 'black';
+    for (const m of moves) {
+      if (eased > departThreshold) {
+        ctx.fillRect(m.bx, m.by, dotSize, dotSize);
+      }
+    }
+
+    ctx.globalAlpha = 1;
+    for (const m of moves) {
+      const x = m.bx + (m.ox - m.bx) * eased;
+      const y = m.by + (m.oy - m.by) * eased;
+      ctx.fillStyle = `rgb(${m.r},${m.g},${m.b})`;
+      ctx.fillRect(Math.floor(x), Math.floor(y), dotSize, dotSize);
+    }
+
+    if (t < 1) {
+      requestAnimationFrame(drawFrame);
+    } else {
+      const outData = ctx.createImageData(w, h);
+      applyPermutation(baseData, assignment, outData);
+      ctx.putImageData(outData, 0, 0);
+      animateBtn.classList.remove('playing');
+      animateBtn.textContent = '▶ Animate';
+    }
+  }
+
+  animateBtn.classList.add('playing');
+  animateBtn.textContent = 'Playing…';
+  requestAnimationFrame(drawFrame);
+}
+
+animateBtn.addEventListener('click', () => {
+  if (lastTransform) runPixelAnimation();
 });

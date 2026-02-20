@@ -222,8 +222,34 @@ input[type="range"] {
   border-radius: 4px;
 }
 
-.btn-download {
+.btn-animate {
   margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-animate:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-animate:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-animate.playing {
+  color: var(--accent);
+}
+
+.btn-download {
   font-size: 1rem;
   width: 2rem;
   height: 2rem;
